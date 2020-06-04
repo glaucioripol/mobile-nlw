@@ -5,6 +5,7 @@
 # points
 
 - trocar scrollview por flatlist
-
+- trocar onde tem o constants por SafeAreaView com flex 1 e remover expo-constants
+- componentizar
 - criar .env e melhorar forma como retorna os icones
   Adicionar um lint

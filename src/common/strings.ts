@@ -6,7 +6,12 @@ export const homeMessage =
 
 // points
 export const welcomePoints = "😀 Bem vindo.";
-export const searchInMapAPoint = 'Encontre no mapa um ponto de coleta.'
+export const searchInMapAPoint = "Encontre no mapa um ponto de coleta.";
+
+// Details
+export const addressText = "Endereço";
+export const whatsappText = "WhatsApp";
+export const emailText = "E-mail";
 
 // common
 export const enterText = "Entrar";
