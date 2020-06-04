@@ -2,4 +2,9 @@
 
 - `expo install @expo-google-fonts/<nome-da-font> expo-font`
 
-Adicionar um lint
+# points
+
+- trocar scrollview por flatlist
+
+- criar .env e melhorar forma como retorna os icones
+  Adicionar um lint
