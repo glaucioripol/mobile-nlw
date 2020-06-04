@@ -1,10 +1,22 @@
 import React from "react";
-import { View, Text } from "react-native";
+import { NavigationContainer } from "@react-navigation/native";
+import { createStackNavigator } from "@react-navigation/stack";
 
-export const routers: React.FC = () => {
+import { Home, Points, Detail } from "../pages";
+
+export const Routers: React.FC = () => {
+  const AppStack = createStackNavigator();
   return (
-    <View>
-      <Text>oi</Text>
-    </View>
+    <NavigationContainer>
+      <AppStack.Navigator headerMode="none" screenOptions={{
+        cardStyle:{
+          backgroundColor: "#F0F0F5"
+        }
+      }}>
+        <AppStack.Screen name="Home" component={Home} />
+        <AppStack.Screen name="Points" component={Points} />
+        <AppStack.Screen name="Detail" component={Detail} />
+      </AppStack.Navigator>
+    </NavigationContainer>
   );
 };

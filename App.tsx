@@ -1,20 +1,32 @@
+import "react-native-gesture-handler";
 import React from "react";
-import { StyleSheet, Text, View, Button } from "react-native";
+import { StatusBar } from "react-native";
+import { AppLoading } from "expo";
 
-export default function App() {
+import { Roboto_400Regular, Roboto_500Medium } from "@expo-google-fonts/roboto";
+import { Ubuntu_700Bold, useFonts } from "@expo-google-fonts/ubuntu";
+
+import { Routers } from "./src/routers";
+
+const App = () => {
+  const [fontsLoaded] = useFonts({
+    Roboto_400Regular,
+    Roboto_500Medium,
+    Ubuntu_700Bold,
+  });
+
+  if (!fontsLoaded) {
+    return <AppLoading />;
+  }
   return (
-    <View style={styles.container}>
-      <Text style={{color: "#fff"}}>Aeee o carai 222</Text>
-      <Button color="red"  title="Oi, clica aqui" onPress={() => alert("te amoo esposa")} />
-    </View>
+    <>
+      <StatusBar
+        barStyle="dark-content"
+        backgroundColor="transparent"
+        translucent
+      />
+      <Routers />
+    </>
   );
-}
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#000",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-});
+};
+export default App;
