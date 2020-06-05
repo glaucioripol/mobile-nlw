@@ -47,7 +47,9 @@ export const Detail: React.FC = () => {
   }
 
   function handleWhatsapp() {
-    Linking.openURL(`whatsapp://send?phone=${pointData.whatsapp}&text=Interesse na coleta de residuos`);
+    Linking.openURL(
+      `whatsapp://send?phone=${pointData.whatsapp}&text=Interesse na coleta de residuos`
+    );
   }
 
   function composeEmail() {
@@ -74,7 +76,7 @@ export const Detail: React.FC = () => {
           <Icon name="arrow-left" size={20} color="#34cb79" />
         </TouchableOpacity>
 
-        <Image style={styles.pointImage} source={{ uri: pointData.image }} />
+        <Image style={styles.pointImage} source={{ uri: pointData.image.replace("localhost", "192.168.100.25") }} />
 
         <Text style={styles.pointName}>{pointData.name}</Text>
 

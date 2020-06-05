@@ -8,7 +8,7 @@ import {
   Alert,
 } from "react-native";
 import { Feather as Icon } from "@expo/vector-icons";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useRoute } from "@react-navigation/native";
 import MapView, { Marker } from "react-native-maps";
 import { SvgUri } from "react-native-svg";
 import * as Location from "expo-location";
@@ -27,7 +27,7 @@ interface IItemResponse {
 
 interface IPointResponse {
   id: number;
-  image: string;
+  image_url: string;
   name: string;
   email: string;
   whatsapp: string;
@@ -35,9 +35,11 @@ interface IPointResponse {
   longitude: number;
   city: string;
   uf: string;
-  // items: {
-  //   title: string;
-  // }[];
+}
+
+interface IRouteParams {
+  uf: string;
+  city: string;
 }
 
 export const Points: React.FC = () => {
@@ -50,6 +52,9 @@ export const Points: React.FC = () => {
   ]);
 
   const { goBack, navigate } = useNavigation();
+  const { params } = useRoute();
+  const { city, uf } = params as IRouteParams;
+
   function handleOnPressReturn() {
     goBack();
   }
@@ -103,14 +108,14 @@ export const Points: React.FC = () => {
       .catch((err) => console.log(err));
   }
 
-  useEffect(retrievePointOfCollect, []);
+  useEffect(retrievePointOfCollect, [selectedItems]);
   function retrievePointOfCollect() {
     api
       .get("points", {
         params: {
-          city: "betim",
-          uf: "mg",
-          items: String([1, 2]),
+          city,
+          uf,
+          items: String(selectedItems),
         },
       })
       .then(({ data }) => {
@@ -140,7 +145,7 @@ export const Points: React.FC = () => {
                 longitudeDelta: 0.014,
               }}
             >
-              {points.map(({ id, latitude, longitude, image, name }) => (
+              {points.map(({ id, latitude, longitude, image_url, name }) => (
                 <Marker
                   key={id.toString()}
                   onPress={handleOnPressToDetail(id)}
@@ -150,7 +155,7 @@ export const Points: React.FC = () => {
                     <Image
                       style={styles.mapMarkerImage}
                       source={{
-                        uri: image
+                        uri: image_url.replace("localhost", "192.168.100.25"),
                       }}
                     />
                     <Text style={styles.mapMarkerTitle}>{name}</Text>
