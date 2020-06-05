@@ -5,6 +5,7 @@ import {
   Image,
   TouchableOpacity,
   Text,
+  Linking,
 } from "react-native";
 import { Feather as Icon, FontAwesome as FAIcon } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
@@ -43,6 +44,10 @@ export const Detail: React.FC = () => {
 
   function handleOnPressReturn() {
     goBack();
+  }
+
+  function handleWhatsapp() {
+    Linking.openURL(`whatsapp://send?phone=${pointData.whatsapp}&text=Interesse na coleta de residuos`);
   }
 
   function composeEmail() {
@@ -86,7 +91,7 @@ export const Detail: React.FC = () => {
       </View>
 
       <View style={styles.footer}>
-        <RectButton style={styles.button} onPress={() => {}}>
+        <RectButton style={styles.button} onPress={handleWhatsapp}>
           <FAIcon name="whatsapp" size={20} color="#FFF" />
           <Text style={styles.buttonText}>{whatsappText}</Text>
         </RectButton>
