@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { View, Text, TouchableOpacity, ScrollView, Image } from "react-native";
 import { Feather as Icon } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
@@ -7,17 +7,50 @@ import { SvgUri } from "react-native-svg";
 
 import { welcomePoints, searchInMapAPoint } from "../../common/strings";
 
+import { api } from "../../services/api";
+
 import { styles } from "./styles";
 
+interface IItemResponse {
+  id: number;
+  title: string;
+  image_url: string;
+}
+// https://youtu.be/xYeaHqpTo3Y?t=5422
 export const Points: React.FC = () => {
+  const [itemsCollect, setItemsCollect] = useState<IItemResponse[]>([]);
+  const [selectedItems, setSelectedItems] = useState<number[]>([]);
+
   const { goBack, navigate } = useNavigation();
   function handleOnPressReturn() {
     goBack();
   }
 
   function handleOnPressToDetail() {
-    navigate('Detail')
+    navigate("Detail");
   }
+
+  function handleSelecItem(id: number) {
+    return () => {
+      if (selectedItems.includes(id)) {
+        const filteredItems = selectedItems.filter((item) => item !== id);
+        setSelectedItems(filteredItems);
+      } else {
+        setSelectedItems([...selectedItems, id]);
+      }
+    };
+  }
+
+  // requests
+  function retrieveItemsToCollect(): void {
+    api //definir tipo para desestruturar
+      .get("/items")
+      .then(({ data }) => {
+        setItemsCollect(data.data);
+      })
+      .catch((err) => console.log(err));
+  }
+  useEffect(retrieveItemsToCollect, []);
 
   return (
     <>
@@ -62,14 +95,26 @@ export const Points: React.FC = () => {
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={{ paddingHorizontal: 20 }}
         >
-          <TouchableOpacity style={styles.item}>
-            <SvgUri
-              width={42}
-              height={42}
-              uri="http://192.168.100.25:3333/uploads/oleo.svg"
-            />
-            <Text style={styles.itemTitle}>oleo</Text>
-          </TouchableOpacity>
+          {itemsCollect?.map(({ id, title, image_url }) => {
+            return (
+              <TouchableOpacity
+                style={[
+                  styles.item,
+                  selectedItems.includes(id) && styles.selectedItem,
+                ]}
+                key={id.toString()}
+                activeOpacity={0.6}
+                onPress={handleSelecItem(id)}
+              >
+                <SvgUri
+                  width={42}
+                  height={42}
+                  uri={image_url.replace("localhost", "192.168.100.25")}
+                />
+                <Text style={styles.itemTitle}>{title}</Text>
+              </TouchableOpacity>
+            );
+          })}
         </ScrollView>
       </View>
     </>
