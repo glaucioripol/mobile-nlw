@@ -11,6 +11,8 @@ import { useNavigation } from "@react-navigation/native";
 import { RectButton } from "react-native-gesture-handler";
 import { useRoute } from "@react-navigation/native";
 
+import * as MailComposer from "expo-mail-composer";
+
 import { api } from "../../services/api";
 
 import { addressText, whatsappText, emailText } from "../../common/strings";
@@ -41,6 +43,13 @@ export const Detail: React.FC = () => {
 
   function handleOnPressReturn() {
     goBack();
+  }
+
+  function composeEmail() {
+    MailComposer.composeAsync({
+      subject: "Interesse na coleta de residuos",
+      recipients: [pointData.email],
+    });
   }
 
   useEffect(retrieveSelectedPoint, []);
@@ -82,7 +91,7 @@ export const Detail: React.FC = () => {
           <Text style={styles.buttonText}>{whatsappText}</Text>
         </RectButton>
 
-        <RectButton style={styles.button} onPress={() => {}}>
+        <RectButton style={styles.button} onPress={composeEmail}>
           <Icon name="mail" size={20} color="#FFF" />
           <Text style={styles.buttonText}>{emailText}</Text>
         </RectButton>
