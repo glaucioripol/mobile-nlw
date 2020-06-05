@@ -1,9 +1,17 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, TouchableOpacity, ScrollView, Image } from "react-native";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  ScrollView,
+  Image,
+  Alert,
+} from "react-native";
 import { Feather as Icon } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import MapView, { Marker } from "react-native-maps";
 import { SvgUri } from "react-native-svg";
+import * as Location from "expo-location";
 
 import { welcomePoints, searchInMapAPoint } from "../../common/strings";
 
@@ -16,18 +24,38 @@ interface IItemResponse {
   title: string;
   image_url: string;
 }
-// https://youtu.be/xYeaHqpTo3Y?t=5422
+
+interface IPointResponse {
+  id: number;
+  image: string;
+  name: string;
+  email: string;
+  whatsapp: string;
+  latitude: number;
+  longitude: number;
+  city: string;
+  uf: string;
+  // items: {
+  //   title: string;
+  // }[];
+}
+
 export const Points: React.FC = () => {
   const [itemsCollect, setItemsCollect] = useState<IItemResponse[]>([]);
   const [selectedItems, setSelectedItems] = useState<number[]>([]);
+  const [points, setPoints] = useState<IPointResponse[]>([]);
+  const [initialPosition, setInitialPosition] = useState<[number, number]>([
+    0,
+    0,
+  ]);
 
   const { goBack, navigate } = useNavigation();
   function handleOnPressReturn() {
     goBack();
   }
 
-  function handleOnPressToDetail() {
-    navigate("Detail");
+  function handleOnPressToDetail(pointId: number) {
+    return () => navigate("Detail", { pointId });
   }
 
   function handleSelecItem(id: number) {
@@ -41,7 +69,31 @@ export const Points: React.FC = () => {
     };
   }
 
+  // get location
+  useEffect(getUserLocation, []);
+  function getUserLocation() {
+    loadPosition();
+  }
+
+  async function loadPosition() {
+    const { status } = await Location.requestPermissionsAsync();
+    if (status !== "granted") {
+      // refatorar
+      Alert.alert(
+        "Oooops...",
+        "Precisamos da sua permissão para obter sua localização"
+      );
+      return;
+    }
+    const {
+      coords: { latitude, longitude },
+    } = await Location.getCurrentPositionAsync();
+    // setInitialPosition([latitude, longitude]); // ta pegando errado no emulador
+    setInitialPosition([-19.9434317, -44.1055362]);
+  }
+
   // requests
+  useEffect(retrieveItemsToCollect, []);
   function retrieveItemsToCollect(): void {
     api //definir tipo para desestruturar
       .get("/items")
@@ -50,7 +102,22 @@ export const Points: React.FC = () => {
       })
       .catch((err) => console.log(err));
   }
-  useEffect(retrieveItemsToCollect, []);
+
+  useEffect(retrievePointOfCollect, []);
+  function retrievePointOfCollect() {
+    api
+      .get("points", {
+        params: {
+          city: "betim",
+          uf: "mg",
+          items: String([1, 2]),
+        },
+      })
+      .then(({ data }) => {
+        setPoints(data.points);
+      })
+      .catch((e) => console.log("tenso", e));
+  }
 
   return (
     <>
@@ -62,31 +129,36 @@ export const Points: React.FC = () => {
         <Text style={styles.description}>{searchInMapAPoint}</Text>
 
         <View style={styles.mapContainer}>
-          <MapView
-            style={styles.map}
-            initialRegion={{
-              latitude: -19.9375236,
-              longitude: -44.1245426,
-              latitudeDelta: 0.14,
-              longitudeDelta: 0.14,
-            }}
-          >
-            <Marker
-              onPress={handleOnPressToDetail}
-              coordinate={{ latitude: -19.9375236, longitude: -44.1245426 }}
+          {initialPosition[0] !== 0 && (
+            <MapView
+              style={styles.map}
+              loadingEnabled={initialPosition[0] === 0}
+              initialRegion={{
+                latitude: initialPosition[0],
+                longitude: initialPosition[1],
+                latitudeDelta: 0.014,
+                longitudeDelta: 0.014,
+              }}
             >
-              <View style={styles.mapMarkerContainer}>
-                <Image
-                  style={styles.mapMarkerImage}
-                  source={{
-                    uri:
-                      "https://cdn.vox-cdn.com/thumbor/wg0JG0pgUHhQEBMYvLAGCXi1AVM=/0x0:5760x3840/1200x675/filters:focal(2329x1554:3249x2474)/cdn.vox-cdn.com/uploads/chorus_image/image/66656302/GettyImages_1203053955.0.jpg",
-                  }}
-                />
-                <Text style={styles.mapMarkerTitle}>nome da api</Text>
-              </View>
-            </Marker>
-          </MapView>
+              {points.map(({ id, latitude, longitude, image, name }) => (
+                <Marker
+                  key={id.toString()}
+                  onPress={handleOnPressToDetail(id)}
+                  coordinate={{ latitude, longitude }}
+                >
+                  <View style={styles.mapMarkerContainer}>
+                    <Image
+                      style={styles.mapMarkerImage}
+                      source={{
+                        uri: image
+                      }}
+                    />
+                    <Text style={styles.mapMarkerTitle}>{name}</Text>
+                  </View>
+                </Marker>
+              ))}
+            </MapView>
+          )}
         </View>
       </View>
       <View style={styles.itemsContainer}>

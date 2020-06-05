@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   SafeAreaView,
   View,
@@ -9,16 +9,50 @@ import {
 import { Feather as Icon, FontAwesome as FAIcon } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { RectButton } from "react-native-gesture-handler";
+import { useRoute } from "@react-navigation/native";
+
+import { api } from "../../services/api";
 
 import { addressText, whatsappText, emailText } from "../../common/strings";
 
 import { styles } from "./styles";
 
+interface RouteParams {
+  pointId: number;
+}
+
+interface IPointInfo {
+  image: string;
+  city: string;
+  uf: string;
+  name: string;
+  email: string;
+  whatsapp: string;
+  items: { title: string }[];
+}
+
 export const Detail: React.FC = () => {
-  const { goBack, navigate } = useNavigation();
+  const route = useRoute();
+  const { goBack } = useNavigation();
+
+  const [pointData, setPointData] = useState<IPointInfo>({} as IPointInfo);
+
+  const { pointId } = route.params as RouteParams;
+
   function handleOnPressReturn() {
     goBack();
   }
+
+  useEffect(retrieveSelectedPoint, []);
+  function retrieveSelectedPoint() {
+    api.get(`/points/${pointId}`).then(({ data }) => setPointData(data));
+  }
+
+  // colocar um loader
+  if (!pointData.name) {
+    return null;
+  }
+
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <View style={styles.container}>
@@ -26,22 +60,19 @@ export const Detail: React.FC = () => {
           <Icon name="arrow-left" size={20} color="#34cb79" />
         </TouchableOpacity>
 
-        <Image
-          style={styles.pointImage}
-          source={{
-            uri:
-              "https://cdn.vox-cdn.com/thumbor/wg0JG0pgUHhQEBMYvLAGCXi1AVM=/0x0:5760x3840/1200x675/filters:focal(2329x1554:3249x2474)/cdn.vox-cdn.com/uploads/chorus_image/image/66656302/GettyImages_1203053955.0.jpg",
-          }}
-        />
+        <Image style={styles.pointImage} source={{ uri: pointData.image }} />
 
-        <Text style={styles.pointName}>aa</Text>
+        <Text style={styles.pointName}>{pointData.name}</Text>
 
-        <Text style={styles.pointItems}>lampira</Text>
-        <Text style={styles.pointItems}>oio</Text>
+        {pointData.items.map(({ title }) => (
+          <Text style={styles.pointItems}>{title}</Text>
+        ))}
 
         <View style={styles.address}>
           <Text style={styles.addressTitle}>{addressText}</Text>
-          <Text style={styles.addressContent}>Betim, mg</Text>
+          <Text
+            style={styles.addressContent}
+          >{`${pointData.city}, ${pointData.uf}`}</Text>
         </View>
       </View>
 
