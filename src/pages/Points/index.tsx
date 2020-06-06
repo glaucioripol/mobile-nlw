@@ -1,117 +1,104 @@
-import React, { useEffect, useState } from "react";
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  ScrollView,
-  Image,
-  Alert,
-} from "react-native";
-import { Feather as Icon } from "@expo/vector-icons";
-import { useNavigation, useRoute } from "@react-navigation/native";
-import MapView, { Marker } from "react-native-maps";
-import { SvgUri } from "react-native-svg";
-import * as Location from "expo-location";
+import React, { useEffect, useState } from 'react'
+import { View, Text, TouchableOpacity, ScrollView, Image, Alert } from 'react-native'
+import { Feather as Icon } from '@expo/vector-icons'
+import { useNavigation, useRoute } from '@react-navigation/native'
+import MapView, { Marker } from 'react-native-maps'
+import { SvgUri } from 'react-native-svg'
+import * as Location from 'expo-location'
 
-import { welcomePoints, searchInMapAPoint } from "../../common/strings";
+import { welcomePoints, searchInMapAPoint } from '../../common/strings'
 
-import { api } from "../../services/api";
+import { api } from '../../services/api'
 
-import { styles } from "./styles";
+import { styles } from './styles'
 
 interface IItemResponse {
-  id: number;
-  title: string;
-  image_url: string;
+  id: number
+  title: string
+  image_url: string
 }
 
 interface IPointResponse {
-  id: number;
-  image_url: string;
-  name: string;
-  email: string;
-  whatsapp: string;
-  latitude: number;
-  longitude: number;
-  city: string;
-  uf: string;
+  id: number
+  image_url: string
+  name: string
+  email: string
+  whatsapp: string
+  latitude: number
+  longitude: number
+  city: string
+  uf: string
 }
 
 interface IRouteParams {
-  uf: string;
-  city: string;
+  uf: string
+  city: string
 }
 
 export const Points: React.FC = () => {
-  const [itemsCollect, setItemsCollect] = useState<IItemResponse[]>([]);
-  const [selectedItems, setSelectedItems] = useState<number[]>([]);
-  const [points, setPoints] = useState<IPointResponse[]>([]);
-  const [initialPosition, setInitialPosition] = useState<[number, number]>([
-    0,
-    0,
-  ]);
+  const [itemsCollect, setItemsCollect] = useState<IItemResponse[]>([])
+  const [selectedItems, setSelectedItems] = useState<number[]>([])
+  const [points, setPoints] = useState<IPointResponse[]>([])
+  const [initialPosition, setInitialPosition] = useState<[number, number]>([0, 0])
 
-  const { goBack, navigate } = useNavigation();
-  const { params } = useRoute();
-  const { city, uf } = params as IRouteParams;
+  const { goBack, navigate } = useNavigation()
+  const { params } = useRoute()
+  const { city, uf } = params as IRouteParams
 
   function handleOnPressReturn() {
-    goBack();
+    goBack()
   }
 
   function handleOnPressToDetail(pointId: number) {
-    return () => navigate("Detail", { pointId });
+    return () => navigate('Detail', { pointId })
   }
 
   function handleSelecItem(id: number) {
     return () => {
       if (selectedItems.includes(id)) {
-        const filteredItems = selectedItems.filter((item) => item !== id);
-        setSelectedItems(filteredItems);
+        const filteredItems = selectedItems.filter((item) => item !== id)
+        setSelectedItems(filteredItems)
       } else {
-        setSelectedItems([...selectedItems, id]);
+        setSelectedItems([...selectedItems, id])
       }
-    };
+    }
   }
 
   // get location
-  useEffect(getUserLocation, []);
+  useEffect(getUserLocation, [])
   function getUserLocation() {
-    loadPosition();
+    loadPosition()
   }
 
   async function loadPosition() {
-    const { status } = await Location.requestPermissionsAsync();
-    if (status !== "granted") {
+    const { status } = await Location.requestPermissionsAsync()
+    if (status !== 'granted') {
       // refatorar
-      Alert.alert(
-        "Oooops...",
-        "Precisamos da sua permissão para obter sua localização"
-      );
-      return;
+      Alert.alert('Oooops...', 'Precisamos da sua permissão para obter sua localização')
+      return
     }
     const {
       coords: { latitude, longitude },
-    } = await Location.getCurrentPositionAsync();
+    } = await Location.getCurrentPositionAsync()
     // setInitialPosition([latitude, longitude]); // ta pegando errado no emulador
-    setInitialPosition([-19.9434317, -44.1055362]);
+    setInitialPosition([-19.9434317, -44.1055362])
   }
 
   // requests
-  useEffect(retrieveItemsToCollect, []);
+  useEffect(retrieveItemsToCollect, [])
   function retrieveItemsToCollect(): void {
-    api //definir tipo para desestruturar
-      .get("/items")
+    api // definir tipo para desestruturar
+      .get('/items')
       .then(({ data }) => {
-        setItemsCollect(data.data);
+        setItemsCollect(data.data)
       })
-      .catch((err) => console.log(err));
+      .catch((err) => console.log(err))
   }
 
-  useEffect(retrievePointOfCollect, [selectedItems]);
+  useEffect(retrievePointOfCollect, [selectedItems])
   function retrievePointOfCollect() {
     api
-      .get("points", {
+      .get('points', {
         params: {
           city,
           uf,
@@ -119,9 +106,9 @@ export const Points: React.FC = () => {
         },
       })
       .then(({ data }) => {
-        setPoints(data.points);
+        setPoints(data.points)
       })
-      .catch((e) => console.log("tenso", e));
+      .catch((e) => console.log('tenso', e))
   }
 
   return (
@@ -143,19 +130,14 @@ export const Points: React.FC = () => {
                 longitude: initialPosition[1],
                 latitudeDelta: 0.014,
                 longitudeDelta: 0.014,
-              }}
-            >
+              }}>
               {points.map(({ id, latitude, longitude, image_url, name }) => (
-                <Marker
-                  key={id.toString()}
-                  onPress={handleOnPressToDetail(id)}
-                  coordinate={{ latitude, longitude }}
-                >
+                <Marker key={id.toString()} onPress={handleOnPressToDetail(id)} coordinate={{ latitude, longitude }}>
                   <View style={styles.mapMarkerContainer}>
                     <Image
                       style={styles.mapMarkerImage}
                       source={{
-                        uri: image_url.replace("localhost", "192.168.100.25"),
+                        uri: image_url.replace('localhost', '192.168.100.25'),
                       }}
                     />
                     <Text style={styles.mapMarkerTitle}>{name}</Text>
@@ -167,33 +149,21 @@ export const Points: React.FC = () => {
         </View>
       </View>
       <View style={styles.itemsContainer}>
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={{ paddingHorizontal: 20 }}
-        >
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 20 }}>
           {itemsCollect?.map(({ id, title, image_url }) => {
             return (
               <TouchableOpacity
-                style={[
-                  styles.item,
-                  selectedItems.includes(id) && styles.selectedItem,
-                ]}
+                style={[styles.item, selectedItems.includes(id) && styles.selectedItem]}
                 key={id.toString()}
                 activeOpacity={0.6}
-                onPress={handleSelecItem(id)}
-              >
-                <SvgUri
-                  width={42}
-                  height={42}
-                  uri={image_url.replace("localhost", "192.168.100.25")}
-                />
+                onPress={handleSelecItem(id)}>
+                <SvgUri width={42} height={42} uri={image_url.replace('localhost', '192.168.100.25')} />
                 <Text style={styles.itemTitle}>{title}</Text>
               </TouchableOpacity>
-            );
+            )
           })}
         </ScrollView>
       </View>
     </>
-  );
-};
+  )
+}
